@@ -1,0 +1,10 @@
+{
+    "containerName": "blackduck-scim",
+    "containerPort": 8090,
+    "healthCheck": {
+        "intervalSeconds": 300,
+        "healthyThreshold": 3,
+        "timeoutSeconds": 60,
+        "unhealthyThreshold": 5
+    }
+}

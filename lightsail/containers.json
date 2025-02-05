@@ -1,0 +1,11 @@
+{
+    "blackduck-scim": {
+        "image": ":blackduck-scim-service.blackduck-scim-container.105",
+        "ports": {
+            "8090": "HTTP"
+        },
+        "environment": {
+            "BD_URL": "https://testing.blackduck.synopsys.com"
+        }    
+    }
+}
