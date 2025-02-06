@@ -8,13 +8,15 @@ Example:<br>
 'Authorization': 'Bearer access_token'
 
 # Supported services/endpoints
-GET /scim/v2/Schemas - return SCIM Schema <br>
-POST /scim/v2/Users - Add user, If user exists already then HTTP Error 409 returned<br>
-PATCH /scim/v2/Users/<string:Id> - Change user info, If user not exists, then http error 404 returned<br>
-DELETE /scim/v2/Users/<string:Id> - Deactivate user from Black Duck SCA<br>
-GET /scim/v2/Users/<string:Id> - Get user info for given Id or username. If not found, then http error 404 returned otherwise<br>
-PUT /scim/v2/Users/<string:Id> - Replace user info for given Id or username. If not found, then http error 404 returned otherwise<br>
-GET /scim/v2/Users - Get users from Black Duck. This API Endpoint supports filttering. Only following filtters are supported: userName and email, and supported operation is only eq = equals.
+| Endpoint | HTTP Method | Description |
+|----------|----------|---------|
+| /scim/v2/Schemas | GET | return SCIM Schema |
+| /scim/v2/Users | POST | Add user, If user exists already then HTTP Error 409 returned |
+| /scim/v2/Users/<string:Id> | PATCH | Change user info, If user not exists, then http error 404 returned |
+| /scim/v2/Users/<string:Id> | DELETE | Deactivate user from Black Duck SCA |
+| /scim/v2/Users/<string:Id> | GET | Get user info for given Id or username. If not found, then http error 404 returned otherwise |
+| /scim/v2/Users/<string:Id> | PUT | Replace user info for given Id or username. If not found, then http error 404 returned otherwise |
+| /scim/v2/Users | GET | Get users from Black Duck. This API Endpoint supports filttering. Only following filtters are supported: userName and email, and supported operation is only eq = equals. |
 
 ## See examples
 [test cases](SCIM_2_0_SPEC_test.json)
