@@ -1,5 +1,5 @@
 # scim-blackducksca
-SCIM -interface for Black Duck SCA
+[SCIM](https://scim.cloud/) -interface for Black Duck SCA
 
 # Needed changes
 Black Duck URL - Service will need Black Duck URL via Environment variable BD_URL or as a bdurl header.<br>
@@ -19,7 +19,7 @@ Example:<br>
 | /scim/v2/Users | GET | Get users from Black Duck. This API Endpoint supports filttering. Only following filtters are supported: userName and email, and supported operation is only eq = equals. |
 
 ## See examples
-[test cases](SCIM_2_0_SPEC_test.json)
+[test cases](SCIM_2_0_SPEC_test.json). This test can be run via [BlazeMeter](https://www.runscope.com/), guidance for SCIM with OKTA [https://developer.okta.com](https://developer.okta.com/docs/concepts/scim/#test-your-scim-server)
 
 # Example how to run SCIM service with AWS Lightsail service
 
