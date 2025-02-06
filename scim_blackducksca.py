@@ -47,20 +47,6 @@ def getToken(request):
         response.status_code = "401"
         return None, response
 
-# API Endpoint to get used Schemas
-@app.route('/scim/v2/Schemas', methods=['GET'])
-def getSchema():
-    for root, dirs, files in os.walk(os.getcwd()):
-        for filename in files:
-            if filename == "scimUserSchema.json":
-                with open(root + os.path.sep + filename, "r") as schemaFile:
-                    response = app.make_response(json.dumps(json.load(schemaFile), indent=3))
-                    response.mimetype = "application/scim+json"
-                    response.status_code = "200"
-                    response = addHeadersForSwagger(response)
-                    logging.info(response.json)
-                    return response
-
 # API Enpoint to add user. If user exists already then HTTP Error 409 returned.
 @app.route('/scim/v2/Users', methods=['POST'])
 def addUser():

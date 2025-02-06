@@ -10,7 +10,6 @@ Example:<br>
 # Supported services/endpoints
 | Endpoint | HTTP Method | Description |
 |----------|----------|---------|
-| /scim/v2/Schemas | GET | return SCIM Schema |
 | /scim/v2/Users | POST | Add user, If user exists already then HTTP Error 409 returned |
 | /scim/v2/Users/<string:Id> | PATCH | Change user info, If user not exists, then http error 404 returned |
 | /scim/v2/Users/<string:Id> | DELETE | Deactivate user from Black Duck SCA |
