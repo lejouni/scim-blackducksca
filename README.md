@@ -19,7 +19,7 @@ Example:<br>
 | /scim/v2/Users | GET | Get users from Black Duck. This API Endpoint supports filttering. Only following filtters are supported: userName and email, and supported operation is only eq = equals. |
 
 ## See examples
-[test cases](SCIM_2_0_SPEC_test.json). This test can be run via [BlazeMeter](https://www.runscope.com/), guidance for SCIM with OKTA [https://developer.okta.com](https://developer.okta.com/docs/concepts/scim/#test-your-scim-server)
+[test cases](SCIM_2_0_SPEC_test.json). This test can be run via [BlazeMeter](https://www.runscope.com/), guidance for SCIM with OKTA [https://developer.okta.com](https://developer.okta.com/docs/api/openapi/okta-scim/guides/scim-20/) and how to run tests [https://developer.okta.com/docs/guides/scim-provisioning-integration-test/main/](https://developer.okta.com/docs/guides/scim-provisioning-integration-test/main/)
 
 # Example how to run SCIM service with AWS Lightsail service
 
