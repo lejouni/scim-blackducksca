@@ -16,14 +16,6 @@ app = Flask(__name__)
 MAX_LIMIT=100
 BD_URL=os.getenv("BD_URL")
 
-class NoAuthorizationException(Exception):
-    pass
-class NoBDUrlException(Exception):
-    pass
-class NoBearerException(Exception):
-    pass
-
-
 def getToken(request):
     global BD_URL
     if request and request.headers.get("Authorization"):
@@ -119,52 +111,74 @@ def addUser():
 def updateUser(Id):
     global BD_URL
     printRequest(request)
-    access_token, response = getToken(request)
-    if access_token:
-        hub = HubInstance(BD_URL, api_token=access_token, write_config_flag=False)
-        users = get_user_by_id(hub, Id)
-        if not users or not "totalCount" in users or users["totalCount"] == 0: 
-            #If user is not found with ID then trying to find user by using Id as an username.
-            parameters = {"limit":1,"q": f"userName:{Id}"}
-            users = hub.get_users(parameters=parameters)
-        if users and users["totalCount"] > 0:
-            if request.json:
+    if request.json:
+        access_token, response = getToken(request)
+        if access_token:
+            hub = HubInstance(BD_URL, api_token=access_token, write_config_flag=False)
+            user = get_user_by_id(hub, Id)
+            if user:
                 for operation in request.json["Operations"]:
                     if operation["op"].casefold() == "replace":
-                        if "path" in operation and operation["path"] == "emails[type eq \"work\"].value":
-                            users["items"][0]["email"] = operation["value"]
-                        elif "path" in operation and operation["path"] == "userName":
-                            users["items"][0]["userName"] = operation["value"]
-                        elif "path" in operation and operation["path"] == "active":
-                            users["items"][0]["active"] = operation["value"]
-                        elif "path" in operation and operation["path"] == "name.givenName":
-                            users["items"][0]["firstName"] = operation["value"]
-                        elif "path" in operation and operation["path"] == "name.familyName":
-                            users["items"][0]["lastName"] = operation["value"]
-                        else:
-                            if "name.familyName" in operation["value"]:
-                                users["items"][0]["lastName"] = operation["value"]["name.familyName"]
-                            if "emails[type eq \"work\"].value" in operation["value"]:
-                                users["items"][0]["email"] = operation["value"]["emails[type eq \"work\"].value"]
-                            if "userName" in operation["value"]:
-                                users["items"][0]["userName"] = operation["value"]["userName"]
-                            if "name.givenName" in operation["value"]:
-                                users["items"][0]["firstName"] = operation["value"]["name.givenName"]
-                            if "active" in operation["value"]:
-                                users["items"][0]["active"] = operation["value"]["active"]
-                hub.update_user_by_url(users["items"][0]["_meta"]["href"], users["items"][0])
-                response = app.make_response(createUserSCIMResponse(users["items"][0], None))
+                        if "active" in operation["value"]:
+                            user["active"] = operation["value"]["active"]
+                        elif "name" in operation["value"]:
+                            if "givenName" in operation["value"]["name"]:
+                                user["firstName"] = operation["value"]["name"]["givenName"]
+                            if "familyName" in operation["value"]["name"]:
+                                user["lastName"] = operation["value"]["name"]["familyName"]
+                        elif "userName" in operation["value"]:
+                            user["userName"] = operation["value"]["userName"]
+                        elif "emails" in operation["value"]:
+                            emails = operation["value"]["emails"]
+                            for email in emails:
+                                if "type" in email and email["type"] == "work":
+                                    user["email"] = email["value"]
+                hub.update_user_by_url(user["_meta"]["href"], user)
+                response = app.make_response(createUserSCIMResponse(user, Id))
                 response.mimetype = "application/scim+json"
                 response.status_code = "200"
                 response = addHeadersForSwagger(response)
                 return response
+            else:
+                #If user is not found with ID then trying to find user by using Id as an username.
+                parameters = {"limit":1,"q": f"userName:{Id}"}
+                users = hub.get_users(parameters=parameters)
+                if users and users["totalCount"] > 0:
+                    for operation in request.json["Operations"]:
+                        if operation["op"].casefold() == "replace":
+                            if "active" in operation["value"]:
+                                users["items"][0]["active"] = operation["value"]["active"]
+                            elif "name" in operation["value"]:
+                                if "givenName" in operation["value"]["name"]:
+                                    users["items"][0]["firstName"] = operation["value"]["name"]["givenName"]
+                                if "familyName" in operation["value"]["name"]:
+                                    users["items"][0]["lastName"] = operation["value"]["name"]["familyName"]
+                            elif "userName" in operation["value"]:
+                                users["items"][0]["userName"] = operation["value"]["userName"]
+                            elif "emails" in operation["value"]:
+                                emails = operation["value"]["emails"]
+                                for email in emails:
+                                    if "type" in email and email["type"] == "work":
+                                        users["items"][0]["email"] = email["value"]
+                    hub.update_user_by_url(users["items"][0]["_meta"]["href"], users["items"][0])
+                    response = app.make_response(createUserSCIMResponse(users["items"][0], None))
+                    response.mimetype = "application/scim+json"
+                    response.status_code = "200"
+                    response = addHeadersForSwagger(response)
+                    return response
+                else:
+                    response = app.make_response(createSCIMErrorResponse(scimType="invalidValue", status_code="404", detail=f"Username: {Id} not found!"))
+                    response.mimetype = "application/scim+json"
+                    response.status_code = "404"
+                    response = addHeadersForSwagger(response)
+                    return response
         else:
-            response = app.make_response(createSCIMErrorResponse(scimType="invalidValue", status_code="404", detail=f"Username: {Id} not found!"))
-            response.mimetype = "application/scim+json"
-            response.status_code = "404"
-            response = addHeadersForSwagger(response)
             return response
     else:
+        response = app.make_response(createSCIMErrorResponse(scimType="invalidValue", status_code="400", detail=f"Request is unparsable, syntactically incorrect, or violates schema"))
+        response.mimetype = "application/scim+json"
+        response.status_code = "400"
+        response = addHeadersForSwagger(response)
         return response
 
 # API Endpoint to delete user, but Black Duck is not supporting this, so user is only inactivated.
@@ -223,7 +237,7 @@ def getUser(Id):
             return response
         else: 
             #If user is not found with ID then trying to find user by using Id as an username.
-            parameters = {"limit":100,"q": f"userName:{Id}"}
+            parameters = {"limit":1,"q": f"userName:{Id}"}
             searched_users = hub.get_users(parameters=parameters)
             if searched_users and "totalCount" in searched_users and searched_users["totalCount"] > 0:
                 response = app.make_response(createUserSCIMResponse(searched_users["items"][0], None))
@@ -239,6 +253,64 @@ def getUser(Id):
                 return response
     else:
         return response
+
+# API Endpoint to replace user info for given Id or username. If not found, then http error 404 returned otherwise
+# returned the existing user info.
+# Id can be Black Duck User Id or userName
+@app.route('/scim/v2/Users/<string:Id>', methods=['PUT'])
+def replaceUserInfo(Id):
+    global BD_URL
+    printRequest(request)
+    if request.json:
+        access_token, response = getToken(request)
+        if access_token:
+            hub = HubInstance(BD_URL, api_token=access_token, write_config_flag=False)
+            user = get_user_by_id(hub, Id)
+            logging.info(user)
+            if user and "userName" in user:
+                user = __updateUserInfo(user, request.json)
+                hub.update_user_by_id(Id, user)
+                response = app.make_response(createUserSCIMResponse(user, Id))
+                response.mimetype = "application/scim+json"
+                response.status_code = "200"
+                response = addHeadersForSwagger(response)
+                return response
+            else: 
+                #If user is not found with ID then trying to find user by using Id as an username.
+                parameters = {"limit":1,"q": f"userName:{Id}"}
+                searched_users = hub.get_users(parameters=parameters)
+                if searched_users and "totalCount" in searched_users and searched_users["totalCount"] > 0:
+                    user = __updateUserInfo(searched_users["items"][0], request.json)
+                    hub.update_user_by_id(Id, user)
+                    response = app.make_response(createUserSCIMResponse(user, Id))
+                    response.mimetype = "application/scim+json"
+                    response.status_code = "200"
+                    response = addHeadersForSwagger(response)
+                    return response
+                else:
+                    response = app.make_response(createSCIMErrorResponse(scimType="invalidValue", status_code="404", detail=f"User: {Id} not found!"))
+                    response.mimetype = "application/scim+json"
+                    response.status_code = "404"
+                    response = addHeadersForSwagger(response)
+                    return response
+        else:
+            return response
+    else:
+        response = app.make_response(createSCIMErrorResponse(scimType="invalidValue", status_code="400", detail=f"Request is unparsable, syntactically incorrect, or violates schema"))
+        response.mimetype = "application/scim+json"
+        response.status_code = "400"
+        response = addHeadersForSwagger(response)
+        return response
+
+
+def __updateUserInfo(oldUser, newUserInfo):
+    if oldUser:
+        oldUser["userName"] = newUserInfo["userName"] if "userName" in newUserInfo else oldUser["userName"]
+        oldUser["externalUserName"] = newUserInfo["externalId"] if "externalId" in newUserInfo else oldUser["externalUserName"]
+        oldUser["firstName"] = newUserInfo["givenName"] if "givenName" in newUserInfo else oldUser["externalUserName"]
+        oldUser["lastName"] = newUserInfo["familyName"] if "familyName" in newUserInfo else oldUser["externalUserName"]
+        oldUser["email"] = newUserInfo["emails"][0]["value"] if "emails" in newUserInfo and newUserInfo["emails"][0] else oldUser["email"]
+    return oldUser
 
 # API Endpoint to get users from Black Duck. This API Endpoint supports filttering.
 # Only following filtters are supported: userName and email, and supported operation is only eq = equals.
@@ -266,16 +338,17 @@ def getUsers():
         if users:
             all_data = users
             if "totalCount" in users and users["totalCount"] > 0:
-                total = int(request.args.get('count')) if request.args and request.args.get('count') else users['totalCount']
-                downloaded = USER_MAXLIMIT
-                while total > downloaded:
-                    parameters["offset"] = downloaded
-                    users = hub.get_users(parameters=parameters)
-                    all_data['items'] = all_data['items'] + users['items']
-                    downloaded += USER_MAXLIMIT
-                scimUsersResponse["totalResults"] = int(request.args.get('count')) if request.args and request.args.get('count') else users['totalCount']
+                if not request.args.get('count') and not request.args.get('startIndex'):
+                    total = users['totalCount']
+                    downloaded = USER_MAXLIMIT
+                    while total > downloaded:
+                        parameters["offset"] = downloaded
+                        users = hub.get_users(parameters=parameters)
+                        all_data['items'] = all_data['items'] + users['items']
+                        downloaded += USER_MAXLIMIT
+                scimUsersResponse["totalResults"] = users['totalCount']
                 scimUsersResponse["itemsPerPage"] = USER_MAXLIMIT
-                scimUsersResponse["startIndex"] = 1
+                scimUsersResponse["startIndex"] = int(request.args.get('startIndex')) if request.args and request.args.get('startIndex') else 1
                 scimUserReources = []
                 for user in all_data["items"]:
                     scimUserReources.append(createUserSCIMResponse(user,None))
@@ -305,7 +378,7 @@ def createBDUser(scimUser):
             "userName" : scimUser["userName"],
             "firstName" :  scimUser["name"]["givenName"],
             "lastName" :  scimUser["name"]["familyName"],
-            "email" :  scimUser["emails"][0]["value"],
+            "email" :  scimUser["emails"][0]["value"] if "emails" in scimUser and scimUser["emails"][0] else "",
             "active" : True,
             "type" : "EXTERNAL"
         }

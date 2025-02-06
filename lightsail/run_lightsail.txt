@@ -22,7 +22,7 @@ aws lightsail create-container-service-deployment --service-name blackduck-scim-
 #Service state must be "ACTIVE"
 #URL Example:
 #    "url": "https://blackduck-scim-service.p7pkbhrp45cc2.us-east-1.cs.amazonlightsail.com/"
-#URL to add github will then be: https://blackduck-scim-service.p7pkbhrp45cc2.us-east-1.cs.amazonlightsail.com//webhook/github/asevents
+#URL to add github will then be: https://blackduck-scim-service.p7pkbhrp45cc2.us-east-1.cs.amazonlightsail.com/scim/v2
 aws lightsail get-container-services --service-name blackduck-scim-service
 
 #After testing is done, you can delete the service with below command.

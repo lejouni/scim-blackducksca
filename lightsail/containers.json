@@ -1,6 +1,6 @@
 {
     "blackduck-scim": {
-        "image": ":blackduck-scim-service.blackduck-scim-container.105",
+        "image": ":blackduck-scim-service.blackduck-scim-container.107",
         "ports": {
             "8090": "HTTP"
         },

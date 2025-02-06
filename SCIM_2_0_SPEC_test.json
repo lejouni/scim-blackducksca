@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "exported_at": 1715608731,
+  "exported_at": 1738838410,
   "name": "Okta SCIM 2.0 SPEC Test",
   "description": "Basic tests to see if your SCIM server will work with Okta",
-  "trigger_url": "https://api.runscope.com/radar/37d9f10e-e250-4071-9cec-1fa30e56b42b/trigger",
+  "trigger_url": "https://api.runscope.com/radar/0b6e4038-e1d8-48cc-9179-e69939b0ad44/trigger",
   "steps": [
     {
       "step_type": "request",
@@ -116,7 +116,7 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -199,7 +199,7 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -245,14 +245,20 @@
           "property": "totalResults"
         }
       ],
-      "variables": [],
+      "variables": [
+        {
+          "source": "response_json",
+          "name": "",
+          "property": ""
+        }
+      ],
       "scripts": [],
       "before_scripts": []
     },
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -305,7 +311,7 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -358,7 +364,7 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -368,7 +374,8 @@
       "body": "{\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"],\"userName\":\"{{randomUsername}}\",\"name\":{\"givenName\":\"{{randomGivenName}}\",\"familyName\":\"{{randomFamilyName}}\"},\"emails\":[{\"primary\":true,\"value\":\"{{randomEmail}}\",\"type\":\"work\"}],\"displayName\":\"{{randomGivenName}} {{randomFamilyName}}\",\"active\":true}",
       "form": {},
       "multipart_form": [],
-      "binary_body": null,
+      "binary_body": [],
+      "graphql_body": {},
       "headers": {
         "Content-Type": [
           "application/json"
@@ -445,7 +452,7 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -502,35 +509,42 @@
       "before_scripts": []
     },
     {
+      "step_type": "pause",
+      "skipped": false,
+      "duration": 3
+    },
+    {
       "step_type": "request",
       "skipped": false,
-      "note": "Required Test: Remove the created user (deactivate)",
-      "auth": {},
+      "note": "Test to change the email",
+      "body": "{\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"],\"userName\":\"{{randomUsername}}\",\"name\":{\"givenName\":\"{{randomGivenName}}\",\"familyName\":\"{{randomFamilyName}}\"},\"emails\":[{\"primary\":true,\"value\":\"put_{{randomEmail}}\",\"type\":\"work\"}],\"displayName\":\"{{randomGivenName}} Changed via PUT\",\"active\":true}",
+      "form": {},
       "multipart_form": [],
       "headers": {
+        "Content-Type": [
+          "application/scim+json",
+          "application/scim+json; charset=utf-8"
+        ],
         "Accept-Charset": [
           "utf-8"
         ],
-        "Content-Type": [
-          "application/scim+json; charset=utf-8"
-        ],
         "Authorization": [
           "{{auth}}"
-        ],
-        "Accept": [
-          "application/scim+json"
         ],
         "User-Agent": [
           "OKTA SCIM Integration"
         ]
       },
-      "method": "DELETE",
-      "url": "{{SCIMBaseURL}}/Users/{{idUserOne}}",
+      "auth": {},
+      "binary_body": [],
+      "graphql_body": {},
+      "method": "PUT",
+      "url": "{{SCIMBaseURL}}/Users/{{idUserOne}}?=",
       "assertions": [
         {
           "comparison": "equal_number",
           "source": "response_status",
-          "value": "204"
+          "value": 200
         }
       ],
       "variables": [],
@@ -540,7 +554,95 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 10
+      "duration": 3
+    },
+    {
+      "step_type": "request",
+      "skipped": false,
+      "note": "Test to change firstName via PATCH",
+      "body": "{\r\n    \"schemas\": [\"urn:ietf:params:scim:api:messages:2.0:PatchOp\"],\r\n    \"Operations\": [{\r\n        \"op\": \"replace\",\r\n        \"value\": {\r\n            \"name\":{\r\n                \"givenName\": \"Jouni\"\r\n            }\r\n        }\r\n    }]\r\n}",
+      "form": {},
+      "multipart_form": [],
+      "headers": {
+        "Content-Type": [
+          "application/scim+json",
+          "application/scim+json; charset=utf-8"
+        ],
+        "Accept-Charset": [
+          "utf-8"
+        ],
+        "Authorization": [
+          "{{auth}}"
+        ],
+        "User-Agent": [
+          "OKTA SCIM Integration"
+        ]
+      },
+      "auth": {},
+      "binary_body": [],
+      "graphql_body": {},
+      "method": "PATCH",
+      "url": "{{SCIMBaseURL}}/Users/{{idUserOne}}",
+      "assertions": [
+        {
+          "comparison": "equal_number",
+          "source": "response_status",
+          "value": 200
+        }
+      ],
+      "variables": [],
+      "scripts": [],
+      "before_scripts": []
+    },
+    {
+      "step_type": "pause",
+      "skipped": false,
+      "duration": 3
+    },
+    {
+      "step_type": "request",
+      "skipped": false,
+      "note": "Delete created user (deactivate)",
+      "body": "",
+      "form": {},
+      "multipart_form": [],
+      "headers": {
+        "Accept": [
+          "application/scim+json"
+        ],
+        "Accept-Charset": [
+          "utf-8"
+        ],
+        "Authorization": [
+          "{{auth}}"
+        ],
+        "Content-Type": [
+          "application/scim+json; charset=utf-8"
+        ],
+        "User-Agent": [
+          "OKTA SCIM Integration"
+        ]
+      },
+      "auth": {},
+      "binary_body": [],
+      "graphql_body": {},
+      "method": "DELETE",
+      "url": "{{SCIMBaseURL}}/Users/{{idUserOne}}",
+      "assertions": [
+        {
+          "comparison": "equal_number",
+          "source": "response_status",
+          "value": 200
+        }
+      ],
+      "variables": [],
+      "scripts": [],
+      "before_scripts": []
+    },
+    {
+      "step_type": "pause",
+      "skipped": false,
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -550,7 +652,8 @@
       "body": "{\"schemas\":[\"urn:ietf:params:scim:schemas:core:2.0:User\"],\"userName\":\"{{randomUsername}}\",\"name\":{\"givenName\":\"{{randomGivenName}}\",\"familyName\":\"{{randomFamilyName}}\"},\"emails\":[{\"primary\":true,\"value\":\"{{randomUsername}}\",\"type\":\"work\"}],\"displayName\":\"{{randomGivenName}} {{randomFamilyName}}\",\"active\":true}",
       "form": {},
       "multipart_form": [],
-      "binary_body": null,
+      "binary_body": [],
+      "graphql_body": {},
       "headers": {
         "Content-Type": [
           "application/json"
@@ -578,7 +681,7 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
@@ -619,60 +722,13 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
-    },
-    {
-      "step_type": "request",
-      "skipped": false,
-      "note": "Optional Test: Verify Groups endpoint",
-      "auth": {},
-      "multipart_form": [],
-      "headers": {
-        "Accept-Charset": [
-          "utf-8"
-        ],
-        "Content-Type": [
-          "application/scim+json; charset=utf-8"
-        ],
-        "Accept": [
-          "application/scim+json"
-        ],
-        "Authorization": [
-          "{{auth}}"
-        ],
-        "User-Agent": [
-          "OKTA SCIM Integration"
-        ]
-      },
-      "method": "GET",
-      "url": "{{SCIMBaseURL}}/Groups",
-      "assertions": [
-        {
-          "comparison": "equal_number",
-          "source": "response_status",
-          "value": "200"
-        },
-        {
-          "comparison": "is_less_than",
-          "source": "response_time",
-          "value": "600"
-        }
-      ],
-      "variables": [],
-      "scripts": [
-        "var data = JSON.parse(response.body);\nvar max = data.totalResults;\nvar res = data.Resources;\nvar exists = false;\n\nif (max === 0)\n\tassert(\"nogroups\", \"No Groups found in the endpoint\");\nelse if (max >= 1 && Array.isArray(res)) {\n    exists = true;\n    assert.ok(exists, \"Resources is of type Array\");\n\tlog(exists);\n}"
-      ],
-      "before_scripts": []
-    },
-    {
-      "step_type": "pause",
-      "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
       "skipped": false,
       "note": "Required Test: Check status 401",
+      "auth": {},
       "multipart_form": [],
       "headers": {
         "Accept": [
@@ -691,7 +747,6 @@
           "OKTA SCIM Integration"
         ]
       },
-      "auth": {},
       "method": "GET",
       "url": "{{SCIMBaseURL}}/Users?filter=userName eq \"{{randomUsernameCaps}}\"",
       "assertions": [
@@ -726,12 +781,13 @@
     {
       "step_type": "pause",
       "skipped": false,
-      "duration": 5
+      "duration": 3
     },
     {
       "step_type": "request",
       "skipped": false,
       "note": "Required Test: Check status 404",
+      "auth": {},
       "multipart_form": [],
       "headers": {
         "Accept": [
@@ -750,7 +806,6 @@
           "OKTA SCIM Integration"
         ]
       },
-      "auth": {},
       "method": "GET",
       "url": "{{SCIMBaseURL}}/Users/00919288221112222",
       "assertions": [
