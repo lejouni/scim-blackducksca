@@ -5,7 +5,7 @@
 **Black Duck URL** - Service will need Black Duck URL via Environment variable BD_URL or as a bdurl header.<br>
 **Black Duck Access Token** - Service will need read&write access token via Authorization header. <br>
 Example:<br>
-'Authorization': 'Bearer access_token'
+'Authorization': 'Bearer access_token'<br>
 'bdurl': 'https://xxx.app.blackduck.com'
 
 # Supported services/endpoints
