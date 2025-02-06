@@ -1,7 +1,7 @@
 # scim-blackducksca
 [SCIM](https://scim.cloud/) -interface for Black Duck SCA
 
-# Needed changes
+# Needed Informations
 Black Duck URL - Service will need Black Duck URL via Environment variable BD_URL or as a bdurl header.<br>
 Black Duck Access Token - Service will need read&write access token via Authorization header. <br>
 Example:<br>
